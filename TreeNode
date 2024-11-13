@@ -1,0 +1,87 @@
+/**
+ * Represents a node in a binary search tree.
+ */
+public class TreeNode implements Comparable<TreeNode> {
+
+    /** The data payload of the node */
+    private String word;
+    /** Left and right child nodes */
+    private TreeNode left;
+    private TreeNode right;
+
+    /**
+     * Constructs a node with the specified word, initially with no children.
+     * 
+     * @param word the data stored in the node
+     */
+    public TreeNode(String word) {
+        this.word = word;
+        this.left = null;
+        this.right = null;
+    }
+
+    /**
+     * Compares this node to another node based on the string value.
+     * 
+     * @param other The node to compare against
+     * @return -1, 0, or 1 based on string comparison
+     */
+    public int compareTo(TreeNode other) {
+        return (other != null) ? this.getWord().compareTo(other.getWord()) : 1;
+    }
+
+    public String toString() {
+        return this.getWord();
+    }
+
+    // Accessors for the left and right children
+    public boolean hasLeft() {
+        return this.left != null;
+    }
+
+    public boolean hasRight() {
+        return this.right != null;
+    }
+
+    public String getWord() {
+        return word;
+    }
+
+    public TreeNode getRight() {
+        return this.right;
+    }
+
+    public TreeNode getLeft() {
+        return this.left;
+    }
+
+    // Mutators for the left and right children
+    public void setLeft(TreeNode node) {
+        this.left = node;
+    }
+
+    public void setRight(TreeNode node) {
+        this.right = node;
+    }
+
+    /**
+     * Updates the stored word in the node.
+     * 
+     * @param word New word to store
+     */
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    /**
+     * Counts the number of children this node has.
+     * 
+     * @return The number of children (0, 1, or 2)
+     */
+    public int countChildren() {
+        int count = 0;
+        if (left != null) count++;
+        if (right != null) count++;
+        return count;
+    }
+}
