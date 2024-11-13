@@ -1,0 +1,219 @@
+/**
+ * A simple binary search tree
+ */
+public class BST {
+
+    /* Constants for default longest and shortest string values */
+    private static final String LONGEST = "";
+    private static final String SHORTEST = " ".repeat(1024);
+
+    /** The entry point or root of the tree */
+    private TreeNode root;
+    /** Count of nodes in the tree */
+    private int numberOfNodes;
+    /** Longest and shortest words stored in the tree */
+    private String longest;
+    private String shortest;
+
+    /** Default constructor initializes an empty tree */
+    public BST() {
+        this.root = null;
+        this.numberOfNodes = 0;
+        this.shortest = SHORTEST;
+        this.longest = LONGEST;
+    } // default constructor
+
+    /**
+     * Adds a node with the specified word to the BST.
+     * This method creates a new TreeNode and inserts it following BST properties.
+     * 
+     * @param word String to add, as a node, to the tree
+     */
+    public void add(String word) {
+        TreeNode newNode = new TreeNode(word);
+        if (root == null) {
+            // If the tree is empty, set the root to the new node
+            root = newNode;
+            updateTreeMetrics(word);
+        } else {
+            TreeNode current = root;
+            TreeNode parent = null;
+
+            // Traverse the tree to find the correct insertion point
+            while (current != null) {
+                parent = current; // Track the parent node of 'current'
+                if (newNode.compareTo(current) < 0) {
+                    current = current.getLeft(); // Move to the left subtree if newNode is smaller
+                } else if (newNode.compareTo(current) > 0) {
+                    current = current.getRight(); // Move to the right subtree if newNode is larger
+                } else {
+                    return; // Duplicate values are not allowed, so we exit without insertion
+                }
+            }
+
+            // At this point, 'current' is null and 'parent' points to the correct location
+            // Determine if the new node should be attached to the left or right of 'parent'
+            if (newNode.compareTo(parent) < 0) {
+                parent.setLeft(newNode);
+            } else {
+                parent.setRight(newNode);
+            }
+
+            // Update tree metrics after successful insertion
+            updateTreeMetrics(word);
+        }
+    }
+
+    /**
+     * Checks if the BST contains the target string.
+     * 
+     * @param target The string to search for in the tree
+     * @return true if the target is found, false otherwise
+     */
+    public boolean contains(String target) {
+        TreeNode current = root;
+        while (current != null) {
+            int comparison = target.compareTo(current.getWord());
+            if (comparison < 0) {
+                current = current.getLeft(); // Move to left subtree if target is smaller
+            } else if (comparison > 0) {
+                current = current.getRight(); // Move to right subtree if target is larger
+            } else {
+                return true; // Target found in the tree
+            }
+        }
+        return false; // Target not found
+    }
+
+    /**
+     * Removes a node with the specified target string from the BST.
+     * This is a wrapper method that calls the more complex overloaded remove method.
+     * 
+     * @param target The value to remove from the tree
+     * @return The removed TreeNode, or null if not found
+     */
+    public TreeNode remove(String target) {
+        TreeNode removed = null;
+        if (target != null && root != null) {
+            removed = this.remove(target, root);
+        }
+        return removed;
+    }
+
+    /**
+     * Overloaded method to remove a node with target from a specified node downwards.
+     * 
+     * @param target    The value to remove from the tree
+     * @param belowNode The root of the subtree where removal is attempted
+     * @return The removed TreeNode, or null if not found
+     */
+    private TreeNode remove(String target, TreeNode belowNode) {
+        TreeNode parent = null;
+        TreeNode current = belowNode;
+
+        // Traverse to find the node to be removed
+        while (current != null && !current.getWord().equals(target)) {
+            parent = current;
+            if (target.compareTo(current.getWord()) < 0) {
+                current = current.getLeft(); // Move left if target is smaller
+            } else {
+                current = current.getRight(); // Move right if target is larger
+            }
+        }
+
+        if (current == null) {
+            return null; // Node to remove not found
+        }
+
+        TreeNode removedNode = current; // Save the node to be removed
+
+        // Case 1: Node to remove has no children
+        if (current.countChildren() == 0) {
+            if (parent == null) {
+                root = null; // Removing the root node
+            } else if (parent.getLeft() == current) {
+                parent.setLeft(null); // Disconnect from left child
+            } else {
+                parent.setRight(null); // Disconnect from right child
+            }
+        }
+
+        // Case 2: Node to remove has one child
+        else if (current.countChildren() == 1) {
+            TreeNode child = (current.getLeft() != null) ? current.getLeft() : current.getRight();
+            if (parent == null) {
+                root = child; // Reassign root if removing root node
+            } else if (parent.getLeft() == current) {
+                parent.setLeft(child); // Attach child to parent's left
+            } else {
+                parent.setRight(child); // Attach child to parent's right
+            }
+        }
+
+        // Case 3: Node to remove has two children
+        else {
+            TreeNode successorParent = current;
+            TreeNode successor = current.getRight();
+            while (successor.getLeft() != null) {
+                successorParent = successor;
+                successor = successor.getLeft();
+            }
+
+            // Replace current's value with successor's value
+            current.setWord(successor.getWord());
+
+            // Remove successor from its original position
+            if (successorParent.getLeft() == successor) {
+                successorParent.setLeft(successor.getRight());
+            } else {
+                successorParent.setRight(successor.getRight());
+            }
+        }
+
+        return removedNode;
+    }
+
+    /**
+     * Provides a textual representation of the BST.
+     * 
+     * @return String representation of the BST
+     */
+    public String toString() {
+        return inOrderTraversal(root);
+    }
+
+    /**
+     * Helper method to perform an in-order traversal and create a string
+     * representation.
+     * 
+     * @param node The starting node for traversal
+     * @return String of the tree values in in-order format
+     */
+    private String inOrderTraversal(TreeNode node) {
+        if (node == null) return "";
+        return inOrderTraversal(node.getLeft()) + node.getWord() + " " + inOrderTraversal(node.getRight());
+    }
+
+    private void updateTreeMetrics(String word) {
+        numberOfNodes++;
+        String trimmedWord = word.trim();
+        if (trimmedWord.length() < shortest.length()) {
+            shortest = trimmedWord;
+        }
+        if (word.length() > longest.length()) {
+            longest = word;
+        }
+    }
+
+    public int getNumberOfNodes() {
+        return numberOfNodes;
+    }
+
+    public String getLongest() {
+        return longest;
+    }
+
+    public String getShortest() {
+        return shortest;
+    }
+}
